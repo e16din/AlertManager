@@ -1,5 +1,6 @@
 # AlertManager
-Convenient  manager pop-up alerts
+Simple manager pop-up alerts
+[![Release](https://jitpack.io/v/e16din/AlertManager.svg)](https://jitpack.io/#e16din/AlertManager)
 
 ## Download (Gradle)
 
@@ -15,7 +16,7 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.github.e16din:AlertManager:1.1.4'
+    compile 'com.github.e16din:AlertManager:1.+'
 }
 ```
 
@@ -24,8 +25,7 @@ dependencies {
 ```java
 AlertManager.manager(context).showAlert("Show must go on!");
 
-AlertManager.manager(context).showAlert(
-                                        R.string.any_message,
+AlertManager.manager(context).showAlert(R.string.any_message,
                                         new DialogInterface.OnClickListener() {
                                             @Override
                                             public void onClick(DialogInterface dialog, int which) {
@@ -34,7 +34,8 @@ AlertManager.manager(context).showAlert(
                                         });
 ```
 
-## Override title of alert dialog
-```xml
-<string name="title_alert"></string>
+## Change title of alert dialogs
+```java
+setCustomAlertTitle(R.string.my_title);
+setCustomErrorTitle(R.string.my_error_title);
 ```
