@@ -1,5 +1,6 @@
 # AlertManager
 Simple manager pop-up alerts
+
 [![Release](https://jitpack.io/v/e16din/AlertManager.svg)](https://jitpack.io/#e16din/AlertManager)
 
 ## Download (Gradle)
