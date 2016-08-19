@@ -1,5 +1,11 @@
 package com.e16din.alertmanager;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+
+import org.joda.time.DateTime;
+
 import android.annotation.TargetApi;
 import android.app.FragmentManager;
 import android.app.TimePickerDialog;
@@ -20,12 +26,6 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
-
-import com.afollestad.materialdialogs.AlertDialogWrapper;
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
-
-import org.joda.time.DateTime;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -59,8 +59,8 @@ public class AlertManager {
         this.context = context;
     }
 
-    private AlertDialogWrapper.Builder createAlertBuilder() {
-        return new AlertDialogWrapper.Builder(context);
+    private MaterialDialog.Builder createAlertBuilder() {
+        return new MaterialDialog.Builder(context);
     }
 
     public static int getCustomAlertTitle() {
@@ -128,22 +128,23 @@ public class AlertManager {
             @Override
             public void run() {
                 try {
-                    AlertDialogWrapper.Builder builder = createAlertBuilder();
+                    MaterialDialog.Builder builder = createAlertBuilder();
 
                     String updatedTitle = context.getString(title);
                     if (!TextUtils.isEmpty(context.getString(title)))
-                        builder.setTitle(updatedTitle);
+                        builder.title(updatedTitle);
 
-                    builder.setMessage(message)
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    builder.content(message)
+                            .positiveText(android.R.string.ok).onPositive(
+                            new MaterialDialog.SingleButtonCallback() {
                                 @Override
-                                public void onClick(DialogInterface dialog, int which) {
+                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                                     displayedAlerts.remove(message);
                                     if (listener != null)
-                                        listener.onClick(dialog, which);
+                                        listener.onClick(dialog, which.ordinal());
 
                                 }
-                            }).setCancelable(isCancelable).setOnKeyListener(
+                            }).cancelable(isCancelable).keyListener(
                             new DialogInterface.OnKeyListener() {
                                 @Override
                                 public boolean onKey(DialogInterface dialog, int keyCode,
@@ -175,22 +176,22 @@ public class AlertManager {
     public void showAlert(final String message, boolean isCancelable,
                           final DialogInterface.OnClickListener listener) {
         try {
-            AlertDialogWrapper.Builder builder = createAlertBuilder();
+            MaterialDialog.Builder builder = createAlertBuilder();
 
             final String customAlertTitle = context.getString(AlertManager.customAlertTitle);
 
             if (!TextUtils.isEmpty(customAlertTitle))
-                builder.setTitle(customAlertTitle);
+                builder.title(customAlertTitle);
 
-            builder.setMessage(message)
-                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            displayedAlerts.remove(message);
-                            if (listener != null)
-                                listener.onClick(dialog, which);
-                        }
-                    }).setCancelable(isCancelable).setOnKeyListener(
+            builder.content(message)
+                    .positiveText(android.R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    displayedAlerts.remove(message);
+                    if (listener != null)
+                        listener.onClick(dialog, which.ordinal());
+                }
+            }).cancelable(isCancelable).keyListener(
                     new DialogInterface.OnKeyListener() {
 
                         @Override
@@ -210,7 +211,6 @@ public class AlertManager {
             Log.e("debug", "error: ", e);
         }
     }
-
 
 
     public void showAlertYesNo(@StringRes int message,
@@ -233,27 +233,27 @@ public class AlertManager {
                                final DialogInterface.OnClickListener yesListener,
                                final DialogInterface.OnClickListener noListener) {
         try {
-            AlertDialogWrapper.Builder builder = createAlertBuilder();
+            MaterialDialog.Builder builder = createAlertBuilder();
 
             final String customAlertTitle = context.getString(AlertManager.customAlertTitle);
 
             if (!TextUtils.isEmpty(customAlertTitle))
-                builder.setTitle(customAlertTitle);
+                builder.title(customAlertTitle);
 
-            builder.setMessage(message)
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            displayedAlerts.remove(message);
-                            if (yesListener != null)
-                                yesListener.onClick(dialog, which);
-                        }
-                    }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+            builder.content(message)
+                    .positiveText(android.R.string.yes).onPositive(new MaterialDialog.SingleButtonCallback() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    displayedAlerts.remove(message);
+                    if (yesListener != null)
+                        yesListener.onClick(dialog, which.ordinal());
+                }
+            }).negativeText(android.R.string.no).onNegative(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                     displayedAlerts.remove(message);
                     if (noListener != null)
-                        noListener.onClick(dialog, which);
+                        noListener.onClick(dialog, which.ordinal());
                 }
             }).show();
             displayedAlerts.add(message);
@@ -265,20 +265,20 @@ public class AlertManager {
     public void showDialogList(final String title, final CharSequence[] items, final TextView tv,
                                final DialogInterface.OnClickListener listener) {
         try {
-            AlertDialogWrapper.Builder builder = createAlertBuilder();
+            MaterialDialog.Builder builder = createAlertBuilder();
 
             if (!TextUtils.isEmpty(title))
-                builder.setTitle(title);
+                builder.title(title);
 
-            builder.setItems(items, new DialogInterface.OnClickListener() {
+            builder.items(items).itemsCallback(new MaterialDialog.ListCallback() {
                 @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if (tv != null && which >= 0)
-                        tv.setText(items[which]);
+                public void onSelection(MaterialDialog dialog, View itemView, int position, CharSequence text) {
+                    if (tv != null && position >= 0)
+                        tv.setText(items[position]);
 
                     displayedAlerts.remove(title);
                     if (listener != null)
-                        listener.onClick(dialog, which);
+                        listener.onClick(dialog, position);
                 }
             }).show();
             displayedAlerts.add(title);
@@ -358,26 +358,25 @@ public class AlertManager {
         timePicker.setCurrentHour(hours);
         timePicker.setCurrentMinute(minutes);
 
-        AlertDialogWrapper.Builder builder = createAlertBuilder();
+        MaterialDialog.Builder builder = createAlertBuilder();
 
         final String title = context.getString(R.string.set_time);
         if (!TextUtils.isEmpty(title))
-            builder.setTitle(title);
+            builder.title(title);
 
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        builder.positiveText(android.R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 onTimeSetListener.onTimeSet(timePicker, timePicker.getCurrentHour(),
                         timePicker.getCurrentMinute());
             }
         })
-                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .setView(timePicker).show();
+                .negativeText(android.R.string.cancel).onNegative(new MaterialDialog.SingleButtonCallback() {
+            @Override
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                dialog.dismiss();
+            }
+        }).customView(timePicker, true).show();
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -390,14 +389,14 @@ public class AlertManager {
         if (maxDate > 0)
             datePicker.setMaxDate(maxDate);
 
-        AlertDialogWrapper.Builder builder = createAlertBuilder();
+        MaterialDialog.Builder builder = createAlertBuilder();
 
         if (!TextUtils.isEmpty(title))
-            builder.setTitle(title);
+            builder.title(title);
 
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+        builder.positiveText(android.R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 Log.d("AlertManager", "year: " + datePicker.getYear() + " month: " +
                         datePicker.getMonth() + 1 + " day: " + datePicker.getDayOfMonth());
                 onDateSetListener.onDateSet(datePicker,
@@ -405,12 +404,12 @@ public class AlertManager {
                         datePicker.getMonth() + 1,
                         datePicker.getDayOfMonth());
             }
-        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+        }).negativeText(android.R.string.cancel).onNegative(new MaterialDialog.SingleButtonCallback() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 dialog.dismiss();
             }
-        }).setView(datePicker).show();
+        }).customView(datePicker, true).show();
     }
 
     public void showDatePicker(final String title, final int year, final int month, final int day,
