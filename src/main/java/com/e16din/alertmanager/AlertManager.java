@@ -341,15 +341,21 @@ public class AlertManager {
                 .show();
     }
 
+    //TODO: show list (see SimpleListDialogs in https://github.com/afollestad/material-dialogs)
+
+    @Deprecated
     public void showDialogList(final CharSequence[] items,
                                DialogInterface.OnClickListener listener) {
         showDialogList(context.getString(customAlertTitle), items, null, listener);
     }
 
+    @Deprecated
     public void showDialogList(final CharSequence[] items, final TextView tv,
                                DialogInterface.OnClickListener listener) {
         showDialogList(context.getString(customAlertTitle), items, tv, listener);
     }
+
+    //TODO: use better picker
 
     public void showTimePicker(int hours, int minutes,
                                final TimePickerDialog.OnTimeSetListener onTimeSetListener) {

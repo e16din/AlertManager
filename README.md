@@ -40,3 +40,9 @@ AlertManager.manager(context).showAlert(R.string.any_message,
 setCustomAlertTitle(R.string.my_title);
 setCustomErrorTitle(R.string.my_error_title);
 ```
+
+# Credits
+This library use following libraries:
+* [Material Dialogs](https://github.com/afollestad/material-dialogs)
+* [MaterialDateTimePicker](https://github.com/wdullaer/MaterialDateTimePicker)
+* [LightUtils](https://github.com/e16din/LightUtils)
