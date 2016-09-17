@@ -5,7 +5,8 @@ package com.e16din.alertmanager;
  */
 public abstract class AlertDialogCallback<T> {
 
-    public abstract void onPositive(T... data);
+    public void onPositive(T... data) {
+    }
 
     public void onNegative(T... data) {
     }

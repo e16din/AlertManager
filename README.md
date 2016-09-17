@@ -17,12 +17,20 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.github.e16din:AlertManager:1.+'
+    compile 'com.github.e16din:AlertManager:1.2.0'
 }
 ```
 
 ## Usage examples
+### Show
+```java
+Show.message(activity, "Hi!").dialog();
 
+Show.message(activity, "Hi!").toast();
+
+Show.message(activity, "Hi!").snackbar();
+```
+### AlertManager
 ```java
 AlertManager.manager(context).showAlert("Show must go on!");
 

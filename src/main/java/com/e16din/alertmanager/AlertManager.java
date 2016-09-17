@@ -1,11 +1,5 @@
 package com.e16din.alertmanager;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
-
-import org.joda.time.DateTime;
-
 import android.annotation.TargetApi;
 import android.app.FragmentManager;
 import android.app.TimePickerDialog;
@@ -27,10 +21,16 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
+import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
+
+import org.joda.time.DateTime;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class AlertManager {
+public final class AlertManager {
 
     public static final String TAG_CALENDAR_DIALOG = "CalendarDialog";
 
@@ -49,75 +49,75 @@ public class AlertManager {
         return Holder.HOLDER_INSTANCE;
     }
 
-    private static int customAlertTitle = R.string.title_alert;
-    private static int customErrorTitle = R.string.title_error;
+    private static int sCustomAlertTitle = R.string.title_alert;
+    private static int sCustomErrorTitle = R.string.title_error;
 
-    private Context context = null;
-    private ArrayList<String> displayedAlerts = new ArrayList<>();
+    private Context mContext = null;
+    private ArrayList<String> mDisplayedAlerts = new ArrayList<>();
 
     private void setContext(@NonNull Context context) {
-        this.context = context;
+        mContext = context;
     }
 
     private MaterialDialog.Builder createAlertBuilder() {
-        return new MaterialDialog.Builder(context);
+        return new MaterialDialog.Builder(mContext);
     }
 
     public static int getCustomAlertTitle() {
-        return customAlertTitle;
+        return sCustomAlertTitle;
     }
 
     public static void setCustomAlertTitle(int customAlertTitle) {
-        AlertManager.customAlertTitle = customAlertTitle;
+        AlertManager.sCustomAlertTitle = customAlertTitle;
     }
 
     public static int getCustomErrorTitle() {
-        return customErrorTitle;
+        return sCustomErrorTitle;
     }
 
     public static void setCustomErrorTitle(int customErrorTitle) {
-        AlertManager.customErrorTitle = customErrorTitle;
+        AlertManager.sCustomErrorTitle = customErrorTitle;
     }
 
     public boolean isAlertDisplayed(String message) {
-        return displayedAlerts.contains(message);
+        return mDisplayedAlerts.contains(message);
     }
 
     public void showAlert(String message, boolean isCancelable) {
-        showAlert(message, customAlertTitle, isCancelable, null);
+        showAlert(message, sCustomAlertTitle, isCancelable, null);
     }
 
     public void showErrorAlert(String message, boolean isCancelable) {
-        showAlert(message, customErrorTitle, isCancelable, null);
+        showAlert(message, sCustomErrorTitle, isCancelable, null);
     }
 
     public void showErrorAlert(String message, boolean isCancelable,
                                DialogInterface.OnClickListener listener) {
-        showAlert(message, customErrorTitle, isCancelable, listener);
+        showAlert(message, sCustomErrorTitle, isCancelable, listener);
     }
 
     public void showAlert(String message) {
-        showAlert(message, customAlertTitle, false, null);
+        showAlert(message, sCustomAlertTitle, false, null);
     }
 
     public void showAlert(int message) {
-        showAlert(message, customAlertTitle, false, null);
+        showAlert(message, sCustomAlertTitle, false, null);
     }
 
     public void showAlert(String message, DialogInterface.OnClickListener listener) {
-        showAlert(message, customAlertTitle, false, listener);
+        showAlert(message, sCustomAlertTitle, false, listener);
     }
 
     public void showAlert(int message, DialogInterface.OnClickListener listener) {
-        showAlert(message, customAlertTitle, false, listener);
+        showAlert(message, sCustomAlertTitle, false, listener);
     }
 
     public void showErrorAlert(String message) {
-        showAlert(message, customErrorTitle, false, null);
+        showAlert(message, sCustomErrorTitle, false, null);
     }
 
     public void showErrorAlert(String message, DialogInterface.OnClickListener listener) {
-        showAlert(message, customErrorTitle, false, listener);
+        showAlert(message, sCustomErrorTitle, false, listener);
     }
 
     public void showAlert(final String message, final int title, final boolean isCancelable,
@@ -130,26 +130,27 @@ public class AlertManager {
                 try {
                     MaterialDialog.Builder builder = createAlertBuilder();
 
-                    String updatedTitle = context.getString(title);
-                    if (!TextUtils.isEmpty(context.getString(title)))
+                    String updatedTitle = mContext.getString(title);
+                    if (!TextUtils.isEmpty(mContext.getString(title)))
                         builder.title(updatedTitle);
 
                     builder.content(message)
-                            .positiveText(android.R.string.ok).onPositive(
-                            new MaterialDialog.SingleButtonCallback() {
+                            .positiveText(android.R.string.ok)
+                            .onPositive(new MaterialDialog.SingleButtonCallback() {
                                 @Override
                                 public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    displayedAlerts.remove(message);
+                                    mDisplayedAlerts.remove(message);
                                     if (listener != null)
                                         listener.onClick(dialog, which.ordinal());
 
                                 }
-                            }).cancelable(isCancelable).keyListener(
-                            new DialogInterface.OnKeyListener() {
+                            })
+                            .cancelable(isCancelable)
+                            .keyListener(new DialogInterface.OnKeyListener() {
                                 @Override
                                 public boolean onKey(DialogInterface dialog, int keyCode,
                                                      KeyEvent event) {
-                                    displayedAlerts.remove(message);
+                                    mDisplayedAlerts.remove(message);
                                     if (keyCode == KeyEvent.KEYCODE_BACK ||
                                             event.getAction() == KeyEvent.ACTION_UP) {
                                         if (listener != null)
@@ -159,10 +160,13 @@ public class AlertManager {
 
                                     return false;
                                 }
-                            }).show();
-                    displayedAlerts.add(message);
+                            })
+                            .show();
+                    mDisplayedAlerts.add(message);
                 } catch (WindowManager.BadTokenException e) {
                     Log.e("debug", "error: ", e);
+                } finally {
+                    mContext = null;
                 }
             }
         }, 500);
@@ -170,7 +174,7 @@ public class AlertManager {
 
     public void showAlert(final int message, int title, boolean isCancelable,
                           final DialogInterface.OnClickListener listener) {
-        showAlert(context.getString(message), title, isCancelable, listener);
+        showAlert(mContext.getString(message), title, isCancelable, listener);
     }
 
     public void showAlert(final String message, boolean isCancelable,
@@ -178,44 +182,50 @@ public class AlertManager {
         try {
             MaterialDialog.Builder builder = createAlertBuilder();
 
-            final String customAlertTitle = context.getString(AlertManager.customAlertTitle);
+            final String customAlertTitle = mContext.getString(AlertManager.sCustomAlertTitle);
 
             if (!TextUtils.isEmpty(customAlertTitle))
                 builder.title(customAlertTitle);
 
             builder.content(message)
-                    .positiveText(android.R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
-                @Override
-                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    displayedAlerts.remove(message);
-                    if (listener != null)
-                        listener.onClick(dialog, which.ordinal());
-                }
-            }).cancelable(isCancelable).keyListener(
-                    new DialogInterface.OnKeyListener() {
-
+                    .positiveText(android.R.string.ok)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
                         @Override
-                        public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                            if (keyCode == KeyEvent.KEYCODE_BACK ||
-                                    event.getAction() == KeyEvent.ACTION_UP) {
-                                displayedAlerts.remove(message);
-                                if (listener != null)
-                                    listener.onClick(dialog, INVALID_VALUE);
-                            }
-
-                            return false;
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            mDisplayedAlerts.remove(message);
+                            if (listener != null)
+                                listener.onClick(dialog, which.ordinal());
                         }
-                    }).show();
-            displayedAlerts.add(message);
+                    })
+                    .cancelable(isCancelable)
+                    .keyListener(
+                            new DialogInterface.OnKeyListener() {
+
+                                @Override
+                                public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                                    if (keyCode == KeyEvent.KEYCODE_BACK ||
+                                            event.getAction() == KeyEvent.ACTION_UP) {
+                                        mDisplayedAlerts.remove(message);
+                                        if (listener != null)
+                                            listener.onClick(dialog, INVALID_VALUE);
+                                    }
+
+                                    return false;
+                                }
+                            })
+                    .show();
+            mDisplayedAlerts.add(message);
         } catch (WindowManager.BadTokenException e) {
             Log.e("debug", "error: ", e);
+        } finally {
+            mContext = null;
         }
     }
 
 
     public void showAlertYesNo(@StringRes int message,
                                @NonNull final DialogInterface.OnClickListener yesListener) {
-        showAlertYesNo(context.getString(message), yesListener, null);
+        showAlertYesNo(mContext.getString(message), yesListener, null);
     }
 
     public void showAlertYesNo(final String message,
@@ -226,7 +236,7 @@ public class AlertManager {
     public void showAlertYesNo(int message,
                                DialogInterface.OnClickListener yesListener,
                                DialogInterface.OnClickListener noListener) {
-        showAlertYesNo(context.getString(message), yesListener, noListener);
+        showAlertYesNo(mContext.getString(message), yesListener, noListener);
     }
 
     public void showAlertYesNo(final String message,
@@ -235,30 +245,36 @@ public class AlertManager {
         try {
             MaterialDialog.Builder builder = createAlertBuilder();
 
-            final String customAlertTitle = context.getString(AlertManager.customAlertTitle);
+            final String customAlertTitle = mContext.getString(AlertManager.sCustomAlertTitle);
 
             if (!TextUtils.isEmpty(customAlertTitle))
                 builder.title(customAlertTitle);
 
             builder.content(message)
-                    .positiveText(android.R.string.yes).onPositive(new MaterialDialog.SingleButtonCallback() {
-                @Override
-                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    displayedAlerts.remove(message);
-                    if (yesListener != null)
-                        yesListener.onClick(dialog, which.ordinal());
-                }
-            }).negativeText(android.R.string.no).onNegative(new MaterialDialog.SingleButtonCallback() {
-                @Override
-                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                    displayedAlerts.remove(message);
-                    if (noListener != null)
-                        noListener.onClick(dialog, which.ordinal());
-                }
-            }).show();
-            displayedAlerts.add(message);
+                    .positiveText(android.R.string.yes)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            mDisplayedAlerts.remove(message);
+                            if (yesListener != null)
+                                yesListener.onClick(dialog, which.ordinal());
+                        }
+                    })
+                    .negativeText(android.R.string.no)
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            mDisplayedAlerts.remove(message);
+                            if (noListener != null)
+                                noListener.onClick(dialog, which.ordinal());
+                        }
+                    })
+                    .show();
+            mDisplayedAlerts.add(message);
         } catch (WindowManager.BadTokenException e) {
             Log.e("debug", "error: ", e);
+        } finally {
+            mContext = null;
         }
     }
 
@@ -270,20 +286,24 @@ public class AlertManager {
             if (!TextUtils.isEmpty(title))
                 builder.title(title);
 
-            builder.items(items).itemsCallback(new MaterialDialog.ListCallback() {
-                @Override
-                public void onSelection(MaterialDialog dialog, View itemView, int position, CharSequence text) {
-                    if (tv != null && position >= 0)
-                        tv.setText(items[position]);
+            builder.items(items)
+                    .itemsCallback(new MaterialDialog.ListCallback() {
+                        @Override
+                        public void onSelection(MaterialDialog dialog, View itemView, int position, CharSequence text) {
+                            if (tv != null && position >= 0)
+                                tv.setText(items[position]);
 
-                    displayedAlerts.remove(title);
-                    if (listener != null)
-                        listener.onClick(dialog, position);
-                }
-            }).show();
-            displayedAlerts.add(title);
+                            mDisplayedAlerts.remove(title);
+                            if (listener != null)
+                                listener.onClick(dialog, position);
+                        }
+                    })
+                    .show();
+            mDisplayedAlerts.add(title);
         } catch (WindowManager.BadTokenException e) {
             Log.e("debug", "error: ", e);
+        } finally {
+            mContext = null;
         }
     }
 
@@ -304,118 +324,145 @@ public class AlertManager {
 
     public void showRadioList(final String title, final CharSequence[] items, final TextView tv,
                               final DialogInterface.OnClickListener listener) {
-        MaterialDialog.Builder builder = new MaterialDialog.Builder(context);
+        try {
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(mContext);
 
-        if (!TextUtils.isEmpty(title))
-            builder.title(title);
+            if (!TextUtils.isEmpty(title))
+                builder.title(title);
 
-        builder.items(items)
-                .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
-                    @Override
-                    public boolean onSelection(MaterialDialog dialog, View view, int which,
-                                               CharSequence text) {
-                        /**
-                         * If you use alwaysCallSingleChoiceCallback(), which is discussed below,
-                         * returning false here won't allow the newly selected radio button to actually be selected.
-                         **/
+            builder.items(items)
+                    .itemsCallbackSingleChoice(-1, new MaterialDialog.ListCallbackSingleChoice() {
+                        @Override
+                        public boolean onSelection(MaterialDialog dialog, View view, int which, CharSequence text) {
+                            /**
+                             * If you use alwaysCallSingleChoiceCallback(), which is discussed below,
+                             * returning false here won't allow the newly selected radio button to actually be selected.
+                             **/
 
-                        if (tv != null && which >= 0)
-                            tv.setText(items[which]);
+                            if (tv != null && which >= 0) {
+                                tv.setText(items[which]);
+                            }
 
-                        if (listener != null)
-                            listener.onClick(dialog, which);
+                            if (listener != null) {
+                                listener.onClick(dialog, which);
+                            }
 
-                        dialog.dismiss();
-                        dialog.cancel();
-                        return true;
-                    }
-                })
-                .alwaysCallSingleChoiceCallback()
-                .positiveText(android.R.string.cancel)
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onPositive(MaterialDialog dialog) {
-                        dialog.dismiss();
-                    }
-                })
-                .show();
+                            dialog.dismiss();
+                            dialog.cancel();
+                            return true;
+                        }
+                    })
+                    .alwaysCallSingleChoiceCallback()
+                    .positiveText(android.R.string.cancel)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .show();
+        } catch (WindowManager.BadTokenException e) {
+            Log.e("debug", "error: ", e);
+        } finally {
+            mContext = null;
+        }
     }
 
     //TODO: show list (see SimpleListDialogs in https://github.com/afollestad/material-dialogs)
 
     @Deprecated
-    public void showDialogList(final CharSequence[] items,
-                               DialogInterface.OnClickListener listener) {
-        showDialogList(context.getString(customAlertTitle), items, null, listener);
+    public void showDialogList(final CharSequence[] items, DialogInterface.OnClickListener listener) {
+        showDialogList(mContext.getString(sCustomAlertTitle), items, null, listener);
     }
 
     @Deprecated
     public void showDialogList(final CharSequence[] items, final TextView tv,
                                DialogInterface.OnClickListener listener) {
-        showDialogList(context.getString(customAlertTitle), items, tv, listener);
+        showDialogList(mContext.getString(sCustomAlertTitle), items, tv, listener);
     }
 
     //TODO: use better picker
 
     public void showTimePicker(int hours, int minutes,
                                final TimePickerDialog.OnTimeSetListener onTimeSetListener) {
-        final TimePicker timePicker = new TimePicker(context);
-        timePicker.setIs24HourView(true);
-        timePicker.setCurrentHour(hours);
-        timePicker.setCurrentMinute(minutes);
+        try {
+            final TimePicker timePicker = new TimePicker(mContext);
+            timePicker.setIs24HourView(true);
+            timePicker.setCurrentHour(hours);
+            timePicker.setCurrentMinute(minutes);
 
-        MaterialDialog.Builder builder = createAlertBuilder();
+            MaterialDialog.Builder builder = createAlertBuilder();
 
-        final String title = context.getString(R.string.set_time);
-        if (!TextUtils.isEmpty(title))
-            builder.title(title);
+            final String title = mContext.getString(R.string.set_time);
+            if (!TextUtils.isEmpty(title))
+                builder.title(title);
 
-        builder.positiveText(android.R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                onTimeSetListener.onTimeSet(timePicker, timePicker.getCurrentHour(),
-                        timePicker.getCurrentMinute());
-            }
-        })
-                .negativeText(android.R.string.cancel).onNegative(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                dialog.dismiss();
-            }
-        }).customView(timePicker, true).show();
+            builder.positiveText(android.R.string.ok)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            onTimeSetListener.onTimeSet(timePicker, timePicker.getCurrentHour(),
+                                    timePicker.getCurrentMinute());
+                        }
+                    })
+                    .negativeText(android.R.string.cancel)
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .customView(timePicker, true)
+                    .show();
+        } catch (WindowManager.BadTokenException e) {
+            Log.e("debug", "error: ", e);
+        } finally {
+            mContext = null;
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void showDatePicker(final String title, final int year, final int month, final int day,
                                long maxDate,
                                final android.app.DatePickerDialog.OnDateSetListener onDateSetListener) {
-        final android.widget.DatePicker datePicker = new android.widget.DatePicker(context);
-        datePicker.updateDate(year, month - 1, day);
-        datePicker.setCalendarViewShown(false);
-        if (maxDate > 0)
-            datePicker.setMaxDate(maxDate);
+        try {
+            final android.widget.DatePicker datePicker = new android.widget.DatePicker(mContext);
+            datePicker.updateDate(year, month - 1, day);
+            datePicker.setCalendarViewShown(false);
+            if (maxDate > 0)
+                datePicker.setMaxDate(maxDate);
 
-        MaterialDialog.Builder builder = createAlertBuilder();
+            MaterialDialog.Builder builder = createAlertBuilder();
 
-        if (!TextUtils.isEmpty(title))
-            builder.title(title);
+            if (!TextUtils.isEmpty(title))
+                builder.title(title);
 
-        builder.positiveText(android.R.string.ok).onPositive(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                Log.d("AlertManager", "year: " + datePicker.getYear() + " month: " +
-                        datePicker.getMonth() + 1 + " day: " + datePicker.getDayOfMonth());
-                onDateSetListener.onDateSet(datePicker,
-                        datePicker.getYear(),
-                        datePicker.getMonth() + 1,
-                        datePicker.getDayOfMonth());
-            }
-        }).negativeText(android.R.string.cancel).onNegative(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                dialog.dismiss();
-            }
-        }).customView(datePicker, true).show();
+            builder.positiveText(android.R.string.ok)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            Log.d("AlertManager", "year: " + datePicker.getYear() + " month: " +
+                                    datePicker.getMonth() + 1 + " day: " + datePicker.getDayOfMonth());
+                            onDateSetListener.onDateSet(datePicker,
+                                    datePicker.getYear(),
+                                    datePicker.getMonth() + 1,
+                                    datePicker.getDayOfMonth());
+                        }
+                    })
+                    .negativeText(android.R.string.cancel)
+                    .onNegative(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .customView(datePicker, true)
+                    .show();
+        } catch (WindowManager.BadTokenException e) {
+            Log.e("debug", "error: ", e);
+        } finally {
+            mContext = null;
+        }
     }
 
     public void showDatePicker(final String title, final int year, final int month, final int day,
@@ -426,7 +473,7 @@ public class AlertManager {
 
     public void showDatePicker(final int year, final int month, final int day,
                                final android.app.DatePickerDialog.OnDateSetListener onDateSetListener) {
-        showDatePicker(context.getString(R.string.check_date), year, month, day,
+        showDatePicker(mContext.getString(R.string.check_date), year, month, day,
                 DateTime.now().plusYears(1).getMillis(), onDateSetListener);
     }
 
@@ -438,7 +485,7 @@ public class AlertManager {
 
     public void showBirthDatePicker(final int year, final int month, final int day,
                                     final android.app.DatePickerDialog.OnDateSetListener onDateSetListener) {
-        showDatePicker(context.getString(R.string.check_date), year, month, day,
+        showDatePicker(mContext.getString(R.string.check_date), year, month, day,
                 DateTime.now().getMillis(), onDateSetListener);
     }
 
@@ -448,68 +495,73 @@ public class AlertManager {
                                    boolean showYearPickerFirst,
                                    boolean dismissOnPause,
                                    @NonNull final AlertDialogCallback<DateTime> callback) {
+        try {
+            final Calendar now = Calendar.getInstance();
+            DatePickerDialog dpd = DatePickerDialog.newInstance(
+                    new DatePickerDialog.OnDateSetListener() {
+                        @Override
+                        public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
+                            mContext = null;
+                            DateTime dateTime = new DateTime(year, monthOfYear, dayOfMonth, 0, 0);
+                            callback.onPick(dateTime);
+                        }
+                    },
+                    now.get(Calendar.YEAR),
+                    now.get(Calendar.MONTH),
+                    now.get(Calendar.DAY_OF_MONTH)
+            );
+            dpd.showYearPickerFirst(showYearPickerFirst);
+            dpd.dismissOnPause(dismissOnPause);
 
-        final Calendar now = Calendar.getInstance();
-        DatePickerDialog dpd = DatePickerDialog.newInstance(
-                new DatePickerDialog.OnDateSetListener() {
-                    @Override
-                    public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-                        DateTime dateTime = new DateTime(year, monthOfYear, dayOfMonth, 0, 0);
-                        callback.onPick(dateTime);
-
-                    }
-                },
-                now.get(Calendar.YEAR),
-                now.get(Calendar.MONTH),
-                now.get(Calendar.DAY_OF_MONTH)
-        );
-        dpd.showYearPickerFirst(showYearPickerFirst);
-        dpd.dismissOnPause(dismissOnPause);
-
-        dpd.show(fm, TAG_CALENDAR_DIALOG);
+            dpd.show(fm, TAG_CALENDAR_DIALOG);
+        } catch (WindowManager.BadTokenException e) {
+            Log.e("debug", "error: ", e);
+        } finally {
+            mContext = null;
+        }
     }
 
     public void showMessageEditor(String message, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), null, message, -1, false, callback);
+        showMessageEditor(mContext.getString(sCustomAlertTitle), null, message, -1, false, callback);
     }
 
     public void showMessageEditor(String message, int inputType, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), null, message, inputType, false, callback);
+        showMessageEditor(mContext.getString(sCustomAlertTitle), null, message, inputType, false, callback);
     }
 
     public void showMessageEditor(String hint, String message, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), hint, message, -1, false, callback);
+        showMessageEditor(mContext.getString(sCustomAlertTitle), hint, message, -1, false, callback);
     }
 
     public void showSingleLineMessageEditor(String message, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), null, message, -1, true, callback);
+        showMessageEditor(mContext.getString(sCustomAlertTitle), null, message, -1, true, callback);
     }
 
     public void showSingleLineMessageEditor(String message, int inputType, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), null, message, inputType, true, callback);
+        showMessageEditor(mContext.getString(sCustomAlertTitle), null, message, inputType, true, callback);
     }
 
     public void showSingleLineMessageEditor(String hint, String message, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), hint, message, -1, true, callback);
+        showMessageEditor(mContext.getString(sCustomAlertTitle), hint, message, -1, true, callback);
     }
 
     public void showTextPasswordEditor(String message, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), context.getString(R.string.enter_password), message,
+        showMessageEditor(mContext.getString(sCustomAlertTitle), mContext.getString(R.string.enter_password), message,
                 InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD, true, callback);
     }
 
     public void showTextPasswordEditor(String message, String hint, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), hint, message,
+        showMessageEditor(mContext.getString(sCustomAlertTitle), hint, message,
                 InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD, true, callback);
     }
 
     public void showNumberPasswordEditor(String message, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), context.getString(R.string.enter_password), message,
+        showMessageEditor(mContext.getString(sCustomAlertTitle), mContext.getString(R.string.enter_password), message,
                 InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_PASSWORD, true, callback);
     }
 
     public void showNumberPasswordEditor(String message, String hint, final AlertDialogCallback<String> callback) {
-        showMessageEditor(context.getString(customAlertTitle), hint, message,
+        showMessageEditor(mContext.getString(sCustomAlertTitle), hint, message,
                 InputType.TYPE_CLASS_NUMBER | InputType.TYPE_TEXT_VARIATION_PASSWORD, true, callback);
     }
 
@@ -517,39 +569,50 @@ public class AlertManager {
 
     public void showMessageEditor(String title, String hint, String message, int inputType, boolean singleLine,
                                   final AlertDialogCallback<String> callback) {
-        final View customView = LayoutInflater.from(context).inflate(R.layout.dialog_edit_message,
-                null);
 
-        final TextInputLayout tilMessage = (TextInputLayout) customView.findViewById(R.id.tilMessage);
-        final EditText etMessage = (EditText) customView.findViewById(R.id.etMessage);
+        try {
+            final View customView = LayoutInflater.from(mContext).inflate(R.layout.dialog_edit_message,
+                    null);
 
-        //etMessage.setHint(hint);
-        etMessage.setText(message);
-        etMessage.setSelection(etMessage.length());
+            final TextInputLayout tilMessage = (TextInputLayout) customView.findViewById(R.id.tilMessage);
+            final EditText etMessage = (EditText) customView.findViewById(R.id.etMessage);
 
-        tilMessage.setHint(hint);
+            //etMessage.setHint(hint);
+            etMessage.setText(message);
+            etMessage.setSelection(etMessage.length());
 
-        if (inputType >= 0)
-            etMessage.setInputType(inputType);
+            tilMessage.setHint(hint);
 
-        if (singleLine)
-            etMessage.setSingleLine();
+            if (inputType >= 0)
+                etMessage.setInputType(inputType);
 
+            if (singleLine)
+                etMessage.setSingleLine();
 
-        new MaterialDialog.Builder(context)
-                .title(title)
-                .customView(customView, false)
-                .positiveText("Готово")
-                .negativeText("Отмена")
-                .callback(new MaterialDialog.ButtonCallback() {
-                    @Override
-                    public void onPositive(MaterialDialog dialog) {
-                        super.onPositive(dialog);
-
-                        String text = etMessage.getText().toString();
-                        if (callback != null)
-                            callback.onPositive(text);
-                    }
-                }).show();
+            new MaterialDialog.Builder(mContext)
+                    .title(title)
+                    .customView(customView, false)
+                    .positiveText("Готово")
+                    .negativeText("Отмена")
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            String text = etMessage.getText().toString();
+                            if (callback != null) {
+                                callback.onPositive(text);
+                            }
+                        }
+                    })
+                    .dismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            mContext = null;
+                        }
+                    }).show();
+        } catch (WindowManager.BadTokenException e) {
+            Log.e("debug", "error: ", e);
+        } finally {
+            mContext = null;
+        }
     }
 }

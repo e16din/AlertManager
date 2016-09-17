@@ -17,7 +17,7 @@ repositories {
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    buildToolsVersion "24.0.2"
 
     defaultConfig {
         minSdkVersion 14
@@ -34,12 +34,12 @@ android {
 }
 
 dependencies {
-    final SUPPORT_LIBRARY_VERSION = '24.1.1'
+    final SUPPORT_LIBRARY_VERSION = '24.2.1'
 
     compile("com.android.support:appcompat-v7:${SUPPORT_LIBRARY_VERSION}")
     compile("com.android.support:design:${SUPPORT_LIBRARY_VERSION}")
 
     compile('com.github.afollestad.material-dialogs:core:0.9.0.1')
     compile('com.wdullaer:materialdatetimepicker:2.5.0')
-    compile('com.github.e16din:LightUtils:1.4.8.1')
+    compile('com.github.e16din:LightUtils:1.5.0')
 }
