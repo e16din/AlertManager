@@ -17,7 +17,7 @@ buildscript {
 }
 
 dependencies {
-    compile 'com.github.e16din:AlertManager:1.2.0'
+    compile 'com.github.e16din:AlertManager:1.2.1'
 }
 ```
 

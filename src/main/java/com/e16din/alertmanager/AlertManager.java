@@ -6,7 +6,6 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
 import android.support.design.widget.TextInputLayout;
@@ -122,54 +121,47 @@ public final class AlertManager {
 
     public void showAlert(final String message, final int title, final boolean isCancelable,
                           final DialogInterface.OnClickListener listener) {
+        try {
+            MaterialDialog.Builder builder = createAlertBuilder();
 
-        Handler h = new Handler();
-        h.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    MaterialDialog.Builder builder = createAlertBuilder();
+            String updatedTitle = mContext.getString(title);
+            if (!TextUtils.isEmpty(mContext.getString(title)))
+                builder.title(updatedTitle);
 
-                    String updatedTitle = mContext.getString(title);
-                    if (!TextUtils.isEmpty(mContext.getString(title)))
-                        builder.title(updatedTitle);
+            builder.content(message)
+                    .positiveText(android.R.string.ok)
+                    .onPositive(new MaterialDialog.SingleButtonCallback() {
+                        @Override
+                        public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                            mDisplayedAlerts.remove(message);
+                            if (listener != null)
+                                listener.onClick(dialog, which.ordinal());
 
-                    builder.content(message)
-                            .positiveText(android.R.string.ok)
-                            .onPositive(new MaterialDialog.SingleButtonCallback() {
-                                @Override
-                                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                                    mDisplayedAlerts.remove(message);
-                                    if (listener != null)
-                                        listener.onClick(dialog, which.ordinal());
-
-                                }
-                            })
-                            .cancelable(isCancelable)
-                            .keyListener(new DialogInterface.OnKeyListener() {
-                                @Override
-                                public boolean onKey(DialogInterface dialog, int keyCode,
-                                                     KeyEvent event) {
-                                    mDisplayedAlerts.remove(message);
-                                    if (keyCode == KeyEvent.KEYCODE_BACK ||
-                                            event.getAction() == KeyEvent.ACTION_UP) {
-                                        if (listener != null)
-                                            listener.onClick(dialog, INVALID_VALUE);
-                                    }
+                        }
+                    })
+                    .cancelable(isCancelable)
+                    .keyListener(new DialogInterface.OnKeyListener() {
+                        @Override
+                        public boolean onKey(DialogInterface dialog, int keyCode,
+                                             KeyEvent event) {
+                            mDisplayedAlerts.remove(message);
+                            if (keyCode == KeyEvent.KEYCODE_BACK ||
+                                    event.getAction() == KeyEvent.ACTION_UP) {
+                                if (listener != null)
+                                    listener.onClick(dialog, INVALID_VALUE);
+                            }
 
 
-                                    return false;
-                                }
-                            })
-                            .show();
-                    mDisplayedAlerts.add(message);
-                } catch (WindowManager.BadTokenException e) {
-                    Log.e("debug", "error: ", e);
-                } finally {
-                    mContext = null;
-                }
-            }
-        }, 500);
+                            return false;
+                        }
+                    })
+                    .show();
+            mDisplayedAlerts.add(message);
+        } catch (WindowManager.BadTokenException e) {
+            Log.e("debug", "error: ", e);
+        } finally {
+            mContext = null;
+        }
     }
 
     public void showAlert(final int message, int title, boolean isCancelable,
