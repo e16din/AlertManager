@@ -3,6 +3,7 @@ package com.e16din.alertmanager;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -77,13 +78,54 @@ public final class Show {
     }
 
     public void snackbar(int length) {
-        snackbar(mActivity.findViewById(android.R.id.content), length);
+        snackbar(mActivity.findViewById(android.R.id.content), length, null, null);
     }
 
-    public void snackbar(View v, int length) {
-        Snackbar.make(v, mMessage, length).show();
+    public void snackbarOk(int length, @Nullable View.OnClickListener onClick) {
+        snackbar(mActivity.findViewById(android.R.id.content),
+                length,
+                android.R.string.ok,
+                onClick);
+    }
+
+    public void snackbarOk(@Nullable View.OnClickListener onClick) {
+        snackbar(mActivity.findViewById(android.R.id.content),
+                Snackbar.LENGTH_INDEFINITE,
+                android.R.string.ok,
+                onClick);
+    }
+
+    public void snackbarCancel(int length, @Nullable View.OnClickListener onClick) {
+        snackbar(mActivity.findViewById(android.R.id.content),
+                length,
+                android.R.string.cancel,
+                onClick);
+    }
+
+    public void snackbarCancel(@Nullable View.OnClickListener onClick) {
+        snackbar(mActivity.findViewById(android.R.id.content),
+                Snackbar.LENGTH_INDEFINITE,
+                android.R.string.cancel,
+                onClick);
+    }
+
+    public void snackbar(View v, int length,
+                         @Nullable String action,
+                         @Nullable View.OnClickListener onClick) {
+        final Snackbar snackbar = Snackbar.make(v, mMessage, length);
+        if (action != null) {
+            snackbar.setAction(action, onClick);
+        }
+        snackbar.show();
         freeActivityWithMessage();
     }
+
+    public void snackbar(View v, int length,
+                         @StringRes int action,
+                         @Nullable View.OnClickListener onClick) {
+        snackbar(v, length, mActivity.getString(action), onClick);
+    }
+
 
     private void freeActivityWithMessage() {
         mActivity = null;
