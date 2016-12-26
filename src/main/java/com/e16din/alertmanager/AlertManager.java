@@ -1,7 +1,6 @@
 package com.e16din.alertmanager;
 
 import android.annotation.TargetApi;
-import android.app.FragmentManager;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -22,12 +21,8 @@ import android.widget.TimePicker;
 
 import com.afollestad.materialdialogs.DialogAction;
 import com.afollestad.materialdialogs.MaterialDialog;
-import com.wdullaer.materialdatetimepicker.date.DatePickerDialog;
-
-import org.joda.time.DateTime;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public final class AlertManager {
 
@@ -450,62 +445,6 @@ public final class AlertManager {
                     })
                     .customView(datePicker, true)
                     .show();
-        } catch (WindowManager.BadTokenException e) {
-            Log.e("debug", "error: ", e);
-        } finally {
-            mContext = null;
-        }
-    }
-
-    public void showDatePicker(final String title, final int year, final int month, final int day,
-                               final android.app.DatePickerDialog.OnDateSetListener onDateSetListener) {
-        showDatePicker(title, year, month, day, DateTime.now().plusYears(1).getMillis(),
-                onDateSetListener);
-    }
-
-    public void showDatePicker(final int year, final int month, final int day,
-                               final android.app.DatePickerDialog.OnDateSetListener onDateSetListener) {
-        showDatePicker(mContext.getString(R.string.check_date), year, month, day,
-                DateTime.now().plusYears(1).getMillis(), onDateSetListener);
-    }
-
-    public void showBirthDatePicker(final String title, final int year, final int month,
-                                    final int day,
-                                    final android.app.DatePickerDialog.OnDateSetListener onDateSetListener) {
-        showDatePicker(title, year, month, day, DateTime.now().getMillis(), onDateSetListener);
-    }
-
-    public void showBirthDatePicker(final int year, final int month, final int day,
-                                    final android.app.DatePickerDialog.OnDateSetListener onDateSetListener) {
-        showDatePicker(mContext.getString(R.string.check_date), year, month, day,
-                DateTime.now().getMillis(), onDateSetListener);
-    }
-
-
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public void showCalendarPicker(@NonNull FragmentManager fm,
-                                   boolean showYearPickerFirst,
-                                   boolean dismissOnPause,
-                                   @NonNull final AlertDialogCallback<DateTime> callback) {
-        try {
-            final Calendar now = Calendar.getInstance();
-            DatePickerDialog dpd = DatePickerDialog.newInstance(
-                    new DatePickerDialog.OnDateSetListener() {
-                        @Override
-                        public void onDateSet(DatePickerDialog view, int year, int monthOfYear, int dayOfMonth) {
-                            mContext = null;
-                            DateTime dateTime = new DateTime(year, monthOfYear, dayOfMonth, 0, 0);
-                            callback.onPick(dateTime);
-                        }
-                    },
-                    now.get(Calendar.YEAR),
-                    now.get(Calendar.MONTH),
-                    now.get(Calendar.DAY_OF_MONTH)
-            );
-            dpd.showYearPickerFirst(showYearPickerFirst);
-            dpd.dismissOnPause(dismissOnPause);
-
-            dpd.show(fm, TAG_CALENDAR_DIALOG);
         } catch (WindowManager.BadTokenException e) {
             Log.e("debug", "error: ", e);
         } finally {

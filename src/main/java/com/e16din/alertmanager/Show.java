@@ -29,7 +29,9 @@ public final class Show {
 
     private Activity mActivity = null;
     private String mMessage = null;
-    private AlertDialogCallback<?> mCallback = null;
+
+    private Runnable mOnPositive = null;
+    private Runnable mOnNegative = null;
 
 
     private Show() {
@@ -44,24 +46,52 @@ public final class Show {
         mMessage = message;
     }
 
-    public <T> Show callback(AlertDialogCallback<T> callback) {
-        mCallback = callback;
+    public Show onPositive(Runnable callback) {
+        mOnPositive = callback;
+        return Holder.HOLDER_INSTANCE;
+    }
+
+    public Show onAction(Runnable callback) {
+        mOnPositive = callback;
+        return Holder.HOLDER_INSTANCE;
+    }
+
+    public Show onNegative(Runnable callback) {
+        mOnNegative = callback;
         return Holder.HOLDER_INSTANCE;
     }
 
     public void dialog() {//todo: change OnClickListener on AlertDialogCallback
-        if (mCallback == null) {
-            AlertManager.manager(mActivity).showAlert(mMessage);
-        } else {
-            AlertManager.manager(mActivity).showAlert(mMessage, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    mCallback.onPositive();
-                    mCallback = null;
+        AlertManager.manager(mActivity).showAlert(mMessage, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (mOnPositive != null) {
+                    mOnPositive.run();
                 }
-            });
-        }
+                freeCallbacks();
+            }
+        });
         freeActivityWithMessage();
+    }
+
+    public void dialogYesNo() {
+        AlertManager.manager(mActivity).showAlertYesNo(mMessage, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (mOnPositive != null) {
+                    mOnPositive.run();
+                }
+                freeCallbacks();
+            }
+        }, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                if (mOnNegative != null) {
+                    mOnNegative.run();
+                }
+                freeCallbacks();
+            }
+        });
     }
 
     public void toast() {
@@ -78,57 +108,61 @@ public final class Show {
     }
 
     public void snackbar(int length) {
-        snackbar(mActivity.findViewById(android.R.id.content), length, null, null);
+        snackbar(mActivity.findViewById(android.R.id.content), length, null);
     }
 
-    public void snackbarOk(int length, @Nullable View.OnClickListener onClick) {
-        snackbar(mActivity.findViewById(android.R.id.content),
-                length,
-                android.R.string.ok,
-                onClick);
+    public void snackbarOk(int length) {
+        snackbar(mActivity.findViewById(android.R.id.content), length, android.R.string.ok);
     }
 
-    public void snackbarOk(@Nullable View.OnClickListener onClick) {
-        snackbar(mActivity.findViewById(android.R.id.content),
-                Snackbar.LENGTH_INDEFINITE,
-                android.R.string.ok,
-                onClick);
+    public void snackbarOk() {
+        snackbar(mActivity.findViewById(android.R.id.content), Snackbar.LENGTH_INDEFINITE, android.R.string.ok);
     }
 
-    public void snackbarCancel(int length, @Nullable View.OnClickListener onClick) {
-        snackbar(mActivity.findViewById(android.R.id.content),
-                length,
-                android.R.string.cancel,
-                onClick);
+    public void snackbarCancel(int length) {
+        snackbar(mActivity.findViewById(android.R.id.content), length, android.R.string.cancel);
     }
 
-    public void snackbarCancel(@Nullable View.OnClickListener onClick) {
-        snackbar(mActivity.findViewById(android.R.id.content),
-                Snackbar.LENGTH_INDEFINITE,
-                android.R.string.cancel,
-                onClick);
+    public void snackbarCancel() {
+        snackbar(mActivity.findViewById(android.R.id.content), Snackbar.LENGTH_INDEFINITE, android.R.string.cancel);
     }
 
-    public void snackbar(View v, int length,
-                         @Nullable String action,
-                         @Nullable View.OnClickListener onClick) {
+    public void snackbar(View v, int length, @Nullable final String action) {
         final Snackbar snackbar = Snackbar.make(v, mMessage, length);
         if (action != null) {
-            snackbar.setAction(action, onClick);
+            snackbar.setAction(action, new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (action.equals(mActivity.getString(android.R.string.cancel))) {
+                        if (mOnNegative != null) {
+                            mOnNegative.run();
+                        }
+                    } else {
+                        if (mOnPositive != null) {
+                            mOnPositive.run();
+                        }
+                    }
+
+                    freeCallbacks();
+                }
+            });
         }
-        snackbar.show();
+
         freeActivityWithMessage();
     }
 
-    public void snackbar(View v, int length,
-                         @StringRes int action,
-                         @Nullable View.OnClickListener onClick) {
-        snackbar(v, length, mActivity.getString(action), onClick);
+    public void snackbar(View v, int length, @StringRes int action) {
+        snackbar(v, length, mActivity.getString(action));
     }
 
 
     private void freeActivityWithMessage() {
         mActivity = null;
         mMessage = null;
+    }
+
+    private void freeCallbacks() {
+        mOnPositive = null;
+        mOnNegative = null;
     }
 }
