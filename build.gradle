@@ -38,6 +38,6 @@ dependencies {
     compile("com.android.support:design:${SUPPORT_LIBRARY_VERSION}")
 
     compile 'com.afollestad.material-dialogs:core:0.9.1.0'
-    compile 'com.wdullaer:materialdatetimepicker:3.0.0'
+    compile 'com.github.e16din:materialdatetimepicker:3.0.1'
     compile 'com.github.e16din:LightUtils:1.5.9'
 }
