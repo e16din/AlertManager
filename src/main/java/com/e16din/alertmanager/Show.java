@@ -133,7 +133,7 @@ public final class Show {
             snackbar.setAction(action, new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (action.equals(mActivity.getString(android.R.string.cancel))) {
+                    if (action.equals(view.getContext().getString(android.R.string.cancel))) {
                         if (mOnNegative != null) {
                             mOnNegative.run();
                         }
