@@ -148,6 +148,8 @@ public final class Show {
             });
         }
 
+        snackbar.show();
+
         freeActivityWithMessage();
     }
 
